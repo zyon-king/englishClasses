@@ -447,17 +447,52 @@ footer::before {
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
 const courseData = {
     'Iniciante': [
-        { title: 'Capítulo 1: Saudações Básicas', audio: 'audio/iniciante_cap1.mp3', text: 'Olá! Como você está? Eu estou bem, obrigado. E você?' },
-        { title: 'Capítulo 2: Apresentações', audio: 'audio/iniciante_cap2.mp3', text: 'Meu nome é João. Prazer em te conhecer. De onde você é? Eu sou do Brasil.' },
-        { title: 'Capítulo 3: Números e Cores', audio: 'audio/iniciante_cap3.mp3', text: 'Um, dois, três. Minha cor favorita é azul. Qual é a sua?' }
+        { 
+            title: 'Capítulo 1: Saudações Básicas', 
+            audio: 'audio/iniciante_cap1.mp3', 
+            text: 'Olá! Como você está? Eu estou bem, obrigado. E você?',
+            subtitle: 'texto/iniciante_cap1.srt' // Nova propriedade
+        },
+        { 
+            title: 'Capítulo 2: Apresentações', 
+            audio: 'audio/iniciante_cap2.mp3', 
+            text: 'Meu nome é João. Prazer em te conhecer. De onde você é? Eu sou do Brasil.',
+            subtitle: 'texto/iniciante_cap2.srt'
+        },
+        { 
+            title: 'Capítulo 3: Números e Cores', 
+            audio: 'audio/iniciante_cap3.mp3', 
+            text: 'Um, dois, três. Minha cor favorita é azul. Qual é a sua?',
+            subtitle: 'texto/iniciante_cap3.srt'
+        }
     ],
     'Intermediário': [
-        { title: 'Capítulo 4: Rotina Diária', audio: 'audio/intermediario_cap4.mp3', text: 'Eu levanto às sete horas da manhã, tomo café da manhã e vou para o trabalho. À noite, eu gosto de ler um livro.' },
-        { title: 'Capítulo 5: Fazendo Compras', audio: 'audio/intermediario_cap5.mp3', text: 'Quanto custa este pão? Você tem leite desnatado? Gostaria de pagar com cartão de crédito, por favor.' }
+        { 
+            title: 'Capítulo 4: Rotina Diária', 
+            audio: 'audio/intermediario_cap4.mp3', 
+            text: 'Eu levanto às sete horas da manhã, tomo café da manhã e vou para o trabalho. À noite, eu gosto de ler um livro.',
+            subtitle: 'texto/intermediario_cap4.srt'
+        },
+        { 
+            title: 'Capítulo 5: Fazendo Compras', 
+            audio: 'audio/intermediario_cap5.mp3', 
+            text: 'Quanto custa este pão? Você tem leite desnatado? Gostaria de pagar com cartão de crédito, por favor.',
+            subtitle: 'texto/intermediario_cap5.srt'
+        }
     ],
     'Avançado': [
-        { title: 'Capítulo 6: Discussão de Notícias', audio: 'audio/avancado_cap6.mp3', text: 'O impacto das recentes mudanças climáticas é preocupante. Precisamos de soluções sustentáveis a longo prazo para mitigar os efeitos.' },
-        { title: 'Capítulo 7: Expressões Idiomáticas', audio: 'audio/avancado_cap7.mp3', text: 'Para bom entendedor, meia palavra basta. Não adianta chorar pelo leite derramado. É melhor prevenir do que remediar.' }
+        { 
+            title: 'Capítulo 6: Discussão de Notícias', 
+            audio: 'audio/avancado_cap6.mp3', 
+            text: 'O impacto das recentes mudanças climáticas é preocupante. Precisamos de soluções sustentáveis a longo prazo para mitigar os efeitos.',
+            subtitle: 'texto/avancado_cap6.srt'
+        },
+        { 
+            title: 'Capítulo 7: Expressões Idiomáticas', 
+            audio: 'audio/avancado_cap7.mp3', 
+            text: 'Para bom entendedor, meia palavra basta. Não adianta chorar pelo leite derramado. É melhor prevenir do que remediar.',
+            subtitle: 'texto/avancado_cap7.srt'
+        }
     ]
 };
 
@@ -510,22 +545,40 @@ function showChapters(level) {
  */
 function showContent(level, chapterIndex) {
     const chapter = courseData[level][chapterIndex];
-
+    
     document.getElementById('level-selection').classList.add('hidden');
     document.getElementById('chapter-selection').classList.add('hidden');
     document.getElementById('content-display').classList.remove('hidden');
-
+    
     // Atualiza o título do conteúdo
     document.getElementById('content-title').textContent = `Conteúdo: ${chapter.title} 🗣️`;
-
-    // Atualiza o áudio
+    
+    // Atualiza o áudio com legenda
     const audioPlayer = document.getElementById('audio-player');
+    
+    // Remove tracks antigas se existirem
+    const oldTracks = audioPlayer.querySelectorAll('track');
+    oldTracks.forEach(track => track.remove());
+    
+    // Atualiza a fonte do áudio
     audioPlayer.src = chapter.audio;
+    
+    // Adiciona a track de legenda se existir
+    if (chapter.subtitle) {
+        const track = document.createElement('track');
+        track.kind = 'subtitles';
+        track.label = 'Português';
+        track.srclang = 'pt';
+        track.src = chapter.subtitle;
+        track.default = true;
+        audioPlayer.appendChild(track);
+    }
+    
     audioPlayer.load(); // Recarrega o player com a nova fonte
-
+    
     // Atualiza o texto
     document.getElementById('lesson-text').textContent = chapter.text;
-
+    
     // Atualiza o botão de voltar para ir para a tela de Capítulos
     document.querySelector('#content-display .back-button').onclick = () => showChapters(currentLevel);
 }
