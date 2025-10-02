@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title></title>
+<style>
+:root {
+  --primary-dark: #0f0f23;
+  --secondary-dark: #1a1a2e;
+  --tertiary-dark: #16213e;
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --accent-color: #667eea;
+  --accent-hover: #7c8efc;
+  --text-primary: #e0e6ed;
+  --text-secondary: #c0c4c9;
+  --text-muted: #a0a6b0;
+  --success-color: #1abc9c;
+  --success-dark: #16a085;
+  --border-glass: rgba(255, 255, 255, 0.1);
+  --bg-glass: rgba(255, 255, 255, 0.05);
+  --bg-glass-hover: rgba(255, 255, 255, 0.08);
+  --shadow-primary: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 8px 20px rgba(102, 126, 234, 0.5);
+  --transition-base: all 0.3s ease;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 50%, var(--tertiary-dark) 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Estilos Específicos do Aplicativo de Aprendizado */
+
+#learning-app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background: var(--bg-glass);
+  border-radius: 20px;
+  box-shadow: var(--shadow-primary);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--border-glass);
+}
+
+#level-selection, #chapter-selection, #content-display {
+  padding: 20px;
+  text-align: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+h1 {
+  margin-bottom: 30px;
+  font-size: 2.2rem;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Estilos para Níveis e Capítulos (Botões de Seleção) */
+
+.level-list, .chapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.level-button, .chapter-button {
+  padding: 15px 25px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: 2px solid var(--accent-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition-base);
+  background: rgba(102, 126, 234, 0.1);
+  color: var(--text-primary);
+  text-align: left;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.level-button::before, .chapter-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.level-button:hover::before, .chapter-button:hover::before {
+  left: 100%;
+}
+
+.level-button:hover, .chapter-button:hover {
+  background: linear-gradient(90deg, var(--accent-color) 0%, #764ba2 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  border-color: transparent;
+}
+
+/* Estilos para o Botão Voltar */
+
+.back-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  margin-bottom: 25px;
+  transition: var(--transition-base);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.back-button:hover {
+  background: linear-gradient(135deg, #7a8085 0%, #65696e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
+}
+
+/* Estilos para Áudio e Texto (content-display) */
+
+.content-box {
+  text-align: left;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 15px;
+  border: 1px solid var(--border-glass);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.content-box h2 {
+  background: linear-gradient(45deg, var(--success-color), var(--success-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+#audio-player {
+  width: 100%;
+  margin-bottom: 20px;
+  background: var(--secondary-dark);
+  border-radius: 10px;
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+#lesson-text {
+  white-space: pre-wrap;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border-left: 5px solid var(--success-color);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Media Queries para Responsividade */
+@media only screen and (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  #learning-app {
+    padding: 10px;
+    margin: 10px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  .level-button, .chapter-button {
+    font-size: 1rem;
+    padding: 12px 20px;
+  }
+
+  .content-box {
+    padding: 20px;
+  }
+
+  .content-box h2 {
+    font-size: 1.5rem;
+  }
+
+  #lesson-text {
+    font-size: 1rem;
+  }
+}
+		</style>
+	</head>
+	<body>
+<div id="learning-app">
+    <div id="level-selection">
+        <h1>Escolha um Nível 🚀</h1>
+        <div class="level-list">
+            <button class="level-button" onclick="showChapters('Iniciante')">Iniciante 👶</button>
+            <button class="level-button" onclick="showChapters('Intermediário')">Intermediário 🧑‍🎓</button>
+            <button class="level-button" onclick="showChapters('Avançado')">Avançado 🧠</button>
+        </div>
+    </div>
+    
+    <div id="chapter-selection" class="hidden">
+        <h1 id="chapter-title">Capítulos do Nível [Nome do Nível]</h1>
+        <button class="back-button" onclick="showLevels()">Voltar aos Níveis</button>
+        <div class="chapter-list">
+            <button class="chapter-button" onclick="showContent('Capítulo 1', 'Nível de Exemplo')">Capítulo 1: Saudações</button>
+            <button class="chapter-button" onclick="showContent('Capítulo 2', 'Nível de Exemplo')">Capítulo 2: Apresentações</button>
+        </div>
+    </div>
+
+    <div id="content-display" class="hidden">
+        <h1 id="content-title">Conteúdo: [Nome do Capítulo]</h1>
+        <button class="back-button" onclick="showChapters('Iniciante')">Voltar aos Capítulos</button>
+        
+        <div class="content-box">
+            <h2>🎧 Áudio</h2>
+            <audio id="audio-player" controls>
+                <source src="" type="audio/mpeg">
+                Seu navegador não suporta o elemento de áudio.
+            </audio>
+
+            <h2>📝 Texto</h2>
+            <p id="lesson-text">
+                Este é o texto da lição para acompanhar o áudio. 
+                Ele aparecerá aqui para você ler e praticar.
+            </p>
+        </div>
+    </div>
+</div>
+<script>
+// 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
+// Bloco | Inicio
+// 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
+const courseData = {
+    'Iniciante': [
+        { title: 'Capítulo 1: Saudações Básicas', audio: 'audio/iniciante_cap1.mp3', text: 'Olá! Como você está? Eu estou bem, obrigado. E você?' },
+        { title: 'Capítulo 2: Apresentações', audio: 'audio/iniciante_cap2.mp3', text: 'Meu nome é João. Prazer em te conhecer. De onde você é? Eu sou do Brasil.' },
+        { title: 'Capítulo 3: Números e Cores', audio: 'audio/iniciante_cap3.mp3', text: 'Um, dois, três. Minha cor favorita é azul. Qual é a sua?' }
+    ],
+    'Intermediário': [
+        { title: 'Capítulo 4: Rotina Diária', audio: 'audio/intermediario_cap4.mp3', text: 'Eu levanto às sete horas da manhã, tomo café da manhã e vou para o trabalho. À noite, eu gosto de ler um livro.' },
+        { title: 'Capítulo 5: Fazendo Compras', audio: 'audio/intermediario_cap5.mp3', text: 'Quanto custa este pão? Você tem leite desnatado? Gostaria de pagar com cartão de crédito, por favor.' }
+    ],
+    'Avançado': [
+        { title: 'Capítulo 6: Discussão de Notícias', audio: 'audio/avancado_cap6.mp3', text: 'O impacto das recentes mudanças climáticas é preocupante. Precisamos de soluções sustentáveis a longo prazo para mitigar os efeitos.' },
+        { title: 'Capítulo 7: Expressões Idiomáticas', audio: 'audio/avancado_cap7.mp3', text: 'Para bom entendedor, meia palavra basta. Não adianta chorar pelo leite derramado. É melhor prevenir do que remediar.' }
+    ]
+};
+
+let currentLevel = ''; // Variável para rastrear o nível atualmente selecionado
+
+// --- Funções de Navegação (Views) ---
+
+/**
+ * Exibe a tela de seleção de Níveis e oculta as outras.
+ */
+function showLevels() {
+    document.getElementById('level-selection').classList.remove('hidden');
+    document.getElementById('chapter-selection').classList.add('hidden');
+    document.getElementById('content-display').classList.add('hidden');
+}
+
+/**
+ * Exibe a tela de seleção de Capítulos para um Nível específico.
+ * @param {string} level O nome do Nível clicado ('Iniciante', 'Intermediário', etc.).
+ */
+function showChapters(level) {
+    currentLevel = level;
+    document.getElementById('level-selection').classList.add('hidden');
+    document.getElementById('chapter-selection').classList.remove('hidden');
+    document.getElementById('content-display').classList.add('hidden');
+
+    // Atualiza o título
+    document.getElementById('chapter-title').textContent = `Capítulos do Nível ${level} 📚`;
+
+    // Preenche a lista de capítulos
+    const chapterListDiv = document.querySelector('#chapter-selection .chapter-list');
+    chapterListDiv.innerHTML = ''; // Limpa os capítulos anteriores
+
+    courseData[level].forEach((chapter, index) => {
+        const chapterButton = document.createElement('button');
+        chapterButton.className = 'chapter-button';
+        chapterButton.textContent = chapter.title;
+        chapterButton.onclick = () => showContent(level, index); // Passa o nível e o índice
+        chapterListDiv.appendChild(chapterButton);
+    });
+
+    // Atualiza o botão de voltar para garantir que volte para a tela de Níveis
+    document.querySelector('#chapter-selection .back-button').onclick = showLevels;
+}
+
+/**
+ * Exibe a tela de Áudio e Texto (Conteúdo) para um Capítulo específico.
+ * @param {string} level O Nível do capítulo.
+ * @param {number} chapterIndex O índice do capítulo dentro do array do Nível.
+ */
+function showContent(level, chapterIndex) {
+    const chapter = courseData[level][chapterIndex];
+
+    document.getElementById('level-selection').classList.add('hidden');
+    document.getElementById('chapter-selection').classList.add('hidden');
+    document.getElementById('content-display').classList.remove('hidden');
+
+    // Atualiza o título do conteúdo
+    document.getElementById('content-title').textContent = `Conteúdo: ${chapter.title} 🗣️`;
+
+    // Atualiza o áudio
+    const audioPlayer = document.getElementById('audio-player');
+    audioPlayer.src = chapter.audio;
+    audioPlayer.load(); // Recarrega o player com a nova fonte
+
+    // Atualiza o texto
+    document.getElementById('lesson-text').textContent = chapter.text;
+
+    // Atualiza o botão de voltar para ir para a tela de Capítulos
+    document.querySelector('#content-display .back-button').onclick = () => showChapters(currentLevel);
+}
+
+
+// --- Inicialização ---
+
+// Garante que a tela inicial seja a de Níveis ao carregar a página
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializa o player de áudio com um placeholder para evitar erro de src vazio
+    const audioPlayer = document.getElementById('audio-player');
+    if (audioPlayer) {
+        audioPlayer.src = ''; 
+    }
+    
+    showLevels(); 
+});
+
+    </script>
+  </body>
+</html>
