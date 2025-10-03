@@ -288,20 +288,17 @@ const courseData = {
     'Stage 1 - Freshman 👶': [
         { 
             title: 'Capítulo 1: Saudações Básicas', 
-            audio: 'audio/iniciante_cap1.mp3', 
-            text: 'Olá! Como você está? Eu estou bem, obrigado. E você?',
-            subtitle: 'texto/iniciante_cap1.srt' // Nova propriedade
+            audio: 'https://f005.backblazeb2.com/file/Trilha/Chapter-1.-Welcome-%26-Nationalities.mp4', 
+            subtitle: 'https://f005.backblazeb2.com/file/Trilha/Chapter-1.-Welcome-%26-Nationalities.srt' // Nova propriedade
         },
         { 
             title: 'Capítulo 2: Apresentações', 
             audio: 'audio/iniciante_cap2.mp3', 
-            text: 'Meu nome é João. Prazer em te conhecer. De onde você é? Eu sou do Brasil.',
             subtitle: 'texto/iniciante_cap2.srt'
         },
         { 
             title: 'Capítulo 3: Números e Cores', 
             audio: 'audio/iniciante_cap3.mp3', 
-            text: 'Um, dois, três. Minha cor favorita é azul. Qual é a sua?',
             subtitle: 'texto/iniciante_cap3.srt'
         }
     ],
@@ -315,7 +312,6 @@ const courseData = {
         { 
             title: 'Capítulo 5: Fazendo Compras', 
             audio: 'audio/intermediario_cap5.mp3', 
-            text: 'Quanto custa este pão? Você tem leite desnatado? Gostaria de pagar com cartão de crédito, por favor.',
             subtitle: 'texto/intermediario_cap5.srt'
         }
     ],
@@ -323,13 +319,11 @@ const courseData = {
         { 
             title: 'Capítulo 6: Discussão de Notícias', 
             audio: 'audio/avancado_cap6.mp3', 
-            text: 'O impacto das recentes mudanças climáticas é preocupante. Precisamos de soluções sustentáveis a longo prazo para mitigar os efeitos.',
             subtitle: 'texto/avancado_cap6.srt'
         },
         { 
             title: 'Capítulo 7: Expressões Idiomáticas', 
             audio: 'audio/avancado_cap7.mp3', 
-            text: 'Para bom entendedor, meia palavra basta. Não adianta chorar pelo leite derramado. É melhor prevenir do que remediar.',
             subtitle: 'texto/avancado_cap7.srt'
         }
     ]
@@ -383,57 +377,157 @@ function showChapters(level) {
     document.querySelector('#chapter-selection .back-button').onclick = showLevels;
 }
 
+// 冨冨冨冨冨冨冨冨冨
+// Bloco Fx | Link Srt
+// 冨冨冨冨冨冨冨冨冨
+
+/**
+ * Converte o formato de tempo do SRT (HH:MM:SS,ms) para segundos.
+ * @param {string} timeString O tempo no formato SRT.
+ * @returns {number} O tempo total em segundos.
+ */
+function srtTimeToSeconds(timeString) {
+    const parts = timeString.split(/[:,]/);
+    const hours = parseInt(parts[0], 10) || 0;
+    const minutes = parseInt(parts[1], 10) || 0;
+    const seconds = parseInt(parts[2], 10) || 0;
+    const milliseconds = parseInt(parts[3], 10) || 0;
+    return hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
+}
+
+/**
+ * Analisa o conteúdo de um arquivo SRT e o transforma em um array de objetos.
+ * @param {string} srtContent O conteúdo completo do arquivo .srt.
+ * @returns {Array<{startTime: number, endTime: number, text: Array<string>}>}
+ */
+function parseSrt(srtContent) {
+    const subtitles = [];
+    const blocks = srtContent.trim().split(/\n\s*\n/); // Divide em blocos de legenda
+
+    for (const block of blocks) {
+        const lines = block.split('\n');
+        // Garante que o bloco tenha pelo menos a linha do tempo e uma linha de texto
+        if (lines.length >= 2) { 
+            const timeLine = lines[1];
+            const timeMatch = timeLine.match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
+            
+            if (timeMatch) {
+                const startTime = srtTimeToSeconds(timeMatch[1]);
+                const endTime = srtTimeToSeconds(timeMatch[2]);
+                
+                // CORRIGIDO: Mantém as linhas de texto como um array, em vez de juntá-las.
+                const textLines = lines.slice(2);
+                
+                subtitles.push({ startTime, endTime, text: textLines });
+            }
+        }
+    }
+    return subtitles;
+}
+
 /**
  * Exibe a tela de Áudio e Texto (Conteúdo) para um Capítulo específico.
+ * Cria legendas clicáveis, toca apenas o trecho selecionado e o destaca.
  * @param {string} level O Nível do capítulo.
  * @param {number} chapterIndex O índice do capítulo dentro do array do Nível.
  */
-function showContent(level, chapterIndex) {
+async function showContent(level, chapterIndex) {
     const chapter = courseData[level][chapterIndex];
-    
+
     document.getElementById('level-selection').classList.add('hidden');
     document.getElementById('chapter-selection').classList.add('hidden');
     document.getElementById('content-display').classList.remove('hidden');
-    
+
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
-    
-    // Usa a expressão para encontrar qualquer emoji na string 'level' e envolvê-lo
-    // com a span que remove a formatação.
     const formattedLevel = level.replace(emojiRegex, '<span class="emoji">$&</span>');
-    
-    // Atualiza o título do conteúdo
     document.getElementById('content-title').innerHTML = `${formattedLevel} <span class="emoji">🗣️</span>`;
-    
-    // Atualiza o áudio com legenda
+
     const audioPlayer = document.getElementById('audio-player');
+    const lessonTextElement = document.getElementById('lesson-text');
     
-    // Remove tracks antigas se existirem
-    const oldTracks = audioPlayer.querySelectorAll('track');
-    oldTracks.forEach(track => track.remove());
-    
-    // Atualiza a fonte do áudio
+    // Reset
     audioPlayer.src = chapter.audio;
-    
-    // Adiciona a track de legenda se existir
+    audioPlayer.ontimeupdate = null;
+    lessonTextElement.innerHTML = 'Carregando texto...';
+
+    // NOVO: Variável para controlar quando o áudio deve parar.
+    // Inicia como null, indicando que não há parada programada.
+    let stopAtTime = null;
+
     if (chapter.subtitle) {
-        const track = document.createElement('track');
-        track.kind = 'subtitles';
-        track.label = 'Português';
-        track.srclang = 'pt';
-        track.src = chapter.subtitle;
-        track.default = true;
-        audioPlayer.appendChild(track);
+        try {
+            const response = await fetch(chapter.subtitle);
+            if (!response.ok) throw new Error('Falha ao carregar o arquivo de legenda.');
+            
+            const srtContent = await response.text();
+            const subtitles = parseSrt(srtContent);
+            
+            lessonTextElement.innerHTML = '';
+
+            subtitles.forEach((sub, index) => {
+                const blockContainer = document.createElement('div');
+                blockContainer.className = 'subtitle-block';
+                blockContainer.id = `sub-block-${index}`;
+                blockContainer.dataset.startTime = sub.startTime;
+
+                // ALTERADO: O evento de clique agora também define o 'stopAtTime'.
+                blockContainer.onclick = () => {
+                    audioPlayer.currentTime = sub.startTime;
+                    stopAtTime = sub.endTime; // Define o tempo exato para parar
+                    audioPlayer.play();
+                };
+
+                sub.text.forEach(lineText => {
+                    const lineElement = document.createElement('span');
+                    lineElement.textContent = lineText;
+                    lineElement.className = 'subtitle-line'; 
+                    blockContainer.appendChild(lineElement); 
+                });
+                
+                lessonTextElement.appendChild(blockContainer);
+            });
+
+            // ALTERADO: 'ontimeupdate' agora tem duas responsabilidades:
+            // 1. Parar o áudio no tempo certo.
+            // 2. Destacar a linha ativa.
+            audioPlayer.ontimeupdate = () => {
+                const currentTime = audioPlayer.currentTime;
+
+                // 1. Lógica para PARAR o áudio
+                if (stopAtTime && currentTime >= stopAtTime) {
+                    audioPlayer.pause();
+                    stopAtTime = null; // Reseta a variável para não interferir na reprodução normal
+                }
+
+                // 2. Lógica para DESTACAR a linha
+                let activeBlockIndex = -1;
+                for (let i = 0; i < subtitles.length; i++) {
+                    if (currentTime >= subtitles[i].startTime && currentTime <= subtitles[i].endTime) {
+                        activeBlockIndex = i;
+                        break;
+                    }
+                }
+                
+                const allBlocks = lessonTextElement.querySelectorAll('.subtitle-block');
+                allBlocks.forEach((block, index) => {
+                    if (index === activeBlockIndex) {
+                        block.classList.add('active-line');
+                    } else {
+                        block.classList.remove('active-line');
+                    }
+                });
+            };
+            
+        } catch (error) {
+            console.error('Erro ao processar o arquivo SRT:', error);
+            lessonTextElement.textContent = 'Não foi possível carregar o texto da lição.';
+        }
+    } else {
+        lessonTextElement.textContent = chapter.text || 'Nenhum texto disponível.';
     }
-    
-    audioPlayer.load(); // Recarrega o player com a nova fonte
-    
-    // Atualiza o texto
-    document.getElementById('lesson-text').textContent = chapter.text;
-    
-    // Atualiza o botão de voltar para ir para a tela de Capítulos
+
     document.querySelector('#content-display .back-button').onclick = () => showChapters(currentLevel);
 }
-
 
 // --- Inicialização ---
 
