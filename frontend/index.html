@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Plataforma de Aprendizado de Idiomas</title>
-<style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Simples com Player de Áudio</title>
+    <style>
 :root {
   --primary-dark: #0f0f23;
   --secondary-dark: #1a1a2e;
@@ -174,15 +174,6 @@ h1 {
   font-weight: 700;
 }
 
-#audio-player {
-  width: 100%;
-  margin-bottom: 20px;
-  background: var(--secondary-dark);
-  border-radius: 10px;
-  border: 1px solid var(--border-glass);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
 #lesson-text {
   white-space: pre-wrap;
   line-height: 1.8;
@@ -195,8 +186,31 @@ h1 {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Adicione este código ao final do seu <style> */
 
+/* Estilo para o player fixo no rodapé */
+.footer-player {
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  width: 100%;
+  background-color: #333;
+  gap: 10px;
+  padding: 5px 10px;
+  box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1); /* Sombra para dar um efeito de elevação */
+}
+
+#audio-player {
+  width: 75%;
+  border-radius: 25%;
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+
+/* CSS para os emojis */
 .emoji {
   font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
   background: none; /* Remove qualquer gradiente ou cor de fundo */
@@ -239,9 +253,9 @@ h1 {
     font-size: 1rem;
   }
 }
-		</style>
-	</head>
-	<body>
+    </style>
+</head>
+<body>
 <div id="learning-app">
     <div id="level-selection">
     	<h1>Plataforma de Aprendizado de Idiomas</h1>
@@ -265,21 +279,21 @@ h1 {
         <button class="back-button" onclick="showChapters('Iniciante')">Voltar aos Capítulos</button>
         
         <div class="content-box">
-            <h2><span class="emoji">🎧</span> Áudio</h2>
-            <audio id="audio-player" controls>
-                <source src="" type="audio/mpeg">
-                Seu navegador não suporta o elemento de áudio.
-            </audio>
-
             <h2><span class="emoji">📝</span> Texto</h2>
             <p id="lesson-text">
             </p>
         </div>
     </div>
-    <footer>
-    </footer>
 </div>
 
+    <!-- Player de áudio fixo no rodapé -->
+    <div class="footer-player" id="audio-player-container">
+        <h2><span class="emoji">🎧</span> Áudio</h2>
+        <audio id="audio-player" controls>
+            <source src="" type="audio/mpeg">
+            Seu navegador não suporta o elemento de áudio.
+        </audio>
+    </div>
 <script>
 // 𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂𒅂
 // Bloco | Inicio
@@ -340,6 +354,7 @@ function showLevels() {
     document.getElementById('level-selection').classList.remove('hidden');
     document.getElementById('chapter-selection').classList.add('hidden');
     document.getElementById('content-display').classList.add('hidden');
+    document.getElementById('audio-player-container').classList.add('hidden');
 }
 
 /**
@@ -351,6 +366,7 @@ function showChapters(level) {
     document.getElementById('level-selection').classList.add('hidden');
     document.getElementById('chapter-selection').classList.remove('hidden');
     document.getElementById('content-display').classList.add('hidden');
+    document.getElementById('audio-player-container').classList.add('hidden');
     
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
     
@@ -437,6 +453,7 @@ async function showContent(level, chapterIndex) {
     document.getElementById('level-selection').classList.add('hidden');
     document.getElementById('chapter-selection').classList.add('hidden');
     document.getElementById('content-display').classList.remove('hidden');
+    document.getElementById('audio-player-container').classList.remove('hidden');
 
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
     const formattedLevel = level.replace(emojiRegex, '<span class="emoji">$&</span>');
@@ -543,5 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
     </script>
-  </body>
+    </script>
+
+</body>
 </html>
